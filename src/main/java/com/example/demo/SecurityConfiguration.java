@@ -13,15 +13,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     protected void configure(AuthenticationManagerBuilder auth)
         throws Exception{
         auth.inMemoryAuthentication().
-                withUser("user").password("password").roles("USER");
+                withUser("user").password("password").roles("USER")
+        .and()
+        .withUser("dave").password("begreat").roles("ADMIN");
     }
-    
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .anyRequest() .authenticated()
+                .antMatchers("/")
+                .access("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
+                .antMatchers("/admin").access("hasRole('ROLE_ADMIN')")
+                .anyRequest().authenticated()
                 .and()
-                .formLogin()
+                .formLogin().loginPage("/login").permitAll()
                 .and()
                 .httpBasic();
 
